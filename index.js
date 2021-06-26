@@ -21,7 +21,7 @@ shapeAI.get("/", (req, res)=>{
 });
 
 /*
-route     /
+route     /is
 description    to get specific books based on isbn
 access     public
 parameters    isbn
@@ -47,20 +47,19 @@ description    to get specific books based on category
 access     public
 parameters    category
 method   GET
-*/
-shapeAI.get("/c/:category", (req, res)=>
-{
-    const getSpecificBooks = database.books.filter((book) => 
-    book.category.includes (req.params.category))
+*/ //not working
+shapeAI.get("/c/:category", (req, res) => {
+  const getSpecificBooks = database.books.filter((book) =>
+    book.category.includes(req.params.category)
+  );
 
+  if (getSpecificBooks.length === 0) {
+    return res.json({
+      error: `No book found for the category of ${req.params.category}`,
+    });
+  }
 
-   if (getSpecificBooks.length === 0) 
-   {
-       return res.json({
-           error: `no book found for the ISBN of ${req.params.isbn}`,
-        });
-   }
-   return res.json({books: getSpecificBooks});
+  return res.json({ books: getSpecificBooks });
 });
 /*
 route     /a
@@ -70,7 +69,7 @@ parameters    none
 method   GET
 */
 
-shapeAI.get ("/author", (req,res)=>
+shapeAI.get ("/a/:author", (req,res)=>
 {
     return res.json({authors: database.authors});
 });
@@ -78,37 +77,37 @@ shapeAI.get ("/author", (req,res)=>
 
 /*
 route     /author
-description    to get the list of all authors based on books
+description    to get the list of all authors based on books isbn
 access     public
 parameters    isbn
 method   GET
 */
 
-shapeAI.get("/author/:isbn", (req, res) =>
-{
-    const getSpecificAuthors =database.authors.filter((authors) =>
+shapeAI.get("/author/book/:isbn", (req, res) => {
+  const getSpecificAuthor = database.author.filter((authors) =>
     authors.books.includes(req.params.isbn)
-    );
-    if (getSpecificAuthors.length === 0)
-    {
-        return res.json({
-            error: `no authors found for the book${req.params.isbn}`,
-        });
-    };
-});
+  );
 
+  if (getSpecificAuthor.length === 0) {
+    return res.json({
+      error: `No Author found for the book of ${req.params.isbn}`,
+    });
+  }
+
+  return res.json({ authors: getSpecificAuthor });
+});
 /*
 route     /publications
 description    to get publications
 access     public
-parameters    none
+parameters    none 
 method   GET
 */
 
 
 shapeAI.get("/publications", (req, res)=>
 {
-    return res.json ({ publications: batabase.publications});
+    return res.json ({ publications: database.publications});
 });
 
 /*
@@ -121,19 +120,18 @@ method   GET
 
 
 
-shapeAI.get("/b/:books", (req, res)=>
-{
-    const getSpecificBooks = database.books.filter((book) => 
-    book.authors.includes (req.params.authors))
+shapeAI.get("/books/authors/:isbn", (req, res) => {
+  const getSpecificBook = database.books.filter((book) =>
+    book.authors.includes(req.params.isbn)
+  );
 
+  if (getSpecificBook.length === 0) {
+    return res.json({
+      error: `No books found for the book of ${req.params.isbn}`,
+    });
+  }
 
-   if (getSpecificBooks.length === 0) 
-   {
-       return res.json({
-           error: `no book found for the ISBN of ${req.params.isbn}`,
-        });
-   }
-   return res.json({books: getSpecificBooks});
+  return res.json({ books: getSpecificBook });
 });
 
 
@@ -141,11 +139,11 @@ shapeAI.get("/b/:books", (req, res)=>
 route     /
 description    to get specific author
 access     public
-parameters    isbn
+parameters    none
 method   GET
 */
 
-shapeAI.get("/ia/:isbn", (req, res) => {
+shapeAI.get("/ia/:author", (req, res) => {
     const getSpecificAuthors = database.authors.filter(
       (authors) => authors.ISBN === req.params.isbn
     );
@@ -158,6 +156,50 @@ shapeAI.get("/ia/:isbn", (req, res) => {
   
     return res.json({ book: getSpecificAuthors });
   });
+
+/*
+route     /ip
+description    to get specific publications 
+access     public
+parameters    none
+method   GET
+*/
+
+
+
+  shapeAI.get("/ip/:publications", (req, res) => {
+    const getSpecificPublications = database.publications.filter(
+      (publications) => publications.ISBN === req.params.isbn
+    );
+  
+    if (getSpecificPublications.length === 0) {
+      return res.json({
+        error: `No publication found for the ISBN of ${req.params.isbn}`,
+      });
+    }
+  
+    return res.json({ book: getSpecificPublications });
+  });
+
+/*
+route     /ib
+description    to get list of publication based on books
+access     public
+parameters    books
+method   GET
+*/
+shapeAI.get("/publications/:isbn", (req, res) =>
+{
+    const getSpecificPublications =database.authors.filter((publications) =>
+    publications.books.includes(req.params.isbn)
+    );
+    if (getSpecificPublications.length === 0)
+    {
+        return res.json({
+            error: `no publications found for the book${req.params.isbn}`,
+        });
+    };
+});
 
 
 shapeAI.listen(3000, () => console.log("server running"));
