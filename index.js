@@ -266,7 +266,7 @@ shapeAI.put("/book/author/update/:isbn",(req, res)=>{
   });
 
 
-  // update the author daatbase
+  // update the author database
   database.authors.forEach((author)=>
   {
     if(author.id === req.body.newAuthor)
@@ -275,6 +275,32 @@ shapeAI.put("/book/author/update/:isbn",(req, res)=>{
   return res.json({books: database.books, authors: database.authors, message: "new authors were added"});
 });
 
+/*
+route     /publication/update/book
+description    update new book to publcation
+access     public
+parameters    isbn
+method   put
+*/
 
+shapeAI.put("/publication/update/book/:isbn", (req, res) => {
+  //update the publication database
+  database.publications.forEach((publication) =>{
+    if(publication.id === res.body.pubID){
+      return publication.books.push(req.params.isbn);
+    }
+  })
+  //update the books database
+  database.books.forEach((book)=>
+  {
+    if(book.ISBN === req.params.isbn){
+      book.publication = req.body.pubID;
+      return;
+    }
+  });
+
+  return res.json({books: database.books, publication: database.publications, message: "successfully running"})
+
+});
 
 shapeAI.listen(3000, () => console.log("server running"));
