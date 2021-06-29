@@ -1,7 +1,8 @@
-
+require("dotenv").config();
 //frame work
-const { request } = require("express");
 const express = require("express");
+const mongoose = require("mongoose");
+
 
 //batabase
 const database = require ("./database/index");
@@ -9,6 +10,13 @@ const database = require ("./database/index");
 const shapeAI = express();
 
 shapeAI.use (express.json());
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+  useCreateIndex: true
+})
+.then(() => console.log("connection established!!"));
 /*
 route     /
 description    to get all books
@@ -49,8 +57,8 @@ parameters    category
 method   GET
 */ //not working
 shapeAI.get("/c/:category", (req, res) => {
-  const getSpecificBooks = database.books.filter((book) =>
-    book.category.includes(req.params.category)
+  const getSpecificBooks = database.book.filter((books) =>
+    books.category.includes(req.params.category)
   );
 
   if (getSpecificBooks.length === 0) {
