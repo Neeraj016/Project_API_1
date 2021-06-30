@@ -10,6 +10,7 @@ const database = require ("./database/index");
 const shapeAI = express();
 
 shapeAI.use (express.json());
+
 mongoose.connect(process.env.MONGO_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -17,6 +18,7 @@ mongoose.connect(process.env.MONGO_URL, {
   useCreateIndex: true
 })
 .then(() => console.log("connection established!!"));
+
 /*
 route     /
 description    to get all books
