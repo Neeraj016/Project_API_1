@@ -35,11 +35,12 @@ access     public
 parameters    none
 method   GET
 */
-shapeAI.get("/", (req, res)=>{
-    return res.json({books: database.books})
+shapeAI.get("/", async(req, res)=>{
+  const getAllBooks = await BookModel.find();
+  return res.json({books: database.books})
 });
 
-/*
+/*z
 route     /is
 description    to get specific books based on isbn
 access     public
@@ -47,12 +48,10 @@ parameters    isbn
 method   GET
 */
 
-shapeAI.get("/is/:isbn", (req, res) => {
-    const getSpecificBook = database.books.filter(
-      (book) => book.ISBN === req.params.isbn
-    );
+shapeAI.get("/is/:isbn",async (req, res) => {
+  const getSpecificBook = await BookModel.findOne({ISBN: req.params.isbn})
   
-    if (getSpecificBook.length === 0) {
+    if (!getSpecificBook) {
       return res.json({
         error: `No book found for the ISBN of ${req.params.isbn}`,
       });
@@ -66,13 +65,11 @@ description    to get specific books based on category
 access     public
 parameters    category
 method   GET
-*/ //not working
-shapeAI.get("/c/:category", (req, res) => {
-  const getSpecificBooks = database.book.filter((books) =>
-    books.category.includes(req.params.category)
-  );
+*/
+shapeAI.get("/c/:category" ,async (req, res) => {
+ const getSpecificBooks = await BookModel.findOne({category: req.params.category,})
 
-  if (getSpecificBooks.length === 0) {
+  if (!getSpecificBooks) {
     return res.json({
       error: `No book found for the category of ${req.params.category}`,
     });
@@ -88,9 +85,10 @@ parameters    none
 method   GET
 */
 
-shapeAI.get ("/a/:author", (req,res)=>
+shapeAI.get ("/a/:author",async (req,res)=>
 {
-    return res.json({authors: database.authors});
+  const getAllAuthor = await AuthorModel.find();
+  return res.json({authors: database.authors});
 });
 
 
@@ -228,9 +226,9 @@ parameters    none
 method   post
 */
 
-shapeAI.post("/book/new", (req, res) =>{
+shapeAI.post("/book/new",async (req, res) =>{
   const{ newBook} = req.body;
-  database.books.push(newBook);
+  const addNewBook = BookModel.create(newBook);
   return res.json({books: database.books,message: "books was added!"})
 });
 
@@ -243,8 +241,8 @@ method   post
 */
 shapeAI.post("/author/new", (req, res) =>{
   const{ newAuthor} = req.body;
-  database.author.push(newAuthor);
-  return res.json({books: database.author,message: "author was added!"})
+  AuthorModel.create(newAuthor);
+  return res.json({message: "author was added!"})
 });
 
 /*
