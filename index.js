@@ -280,21 +280,47 @@ method   put
 */
 
 
-shapeAI.put("/book/author/update/:isbn",(req, res)=>{
+shapeAI.put("/book/author/update/:isbn", async(req, res)=>{
   //update of the book
-  database.books.forEach((book)=>{
-    if (book.ISBN === req.params.isbn) 
-    return book.authors.push(req.body.newAuthor);
-  });
-
+  // database.books.forEach((book)=>{
+  //   if (book.ISBN === req.params.isbn) 
+  //   return book.authors.push(req.body.newAuthor);
+  // });
+const upadatedBook = await BookModel.findOneAndUpdate(
+  {
+    ISBN: req.params.isbn,
+  },
+  {
+    $push: {
+      authors: req.body.newAuthor,
+    },
+  },
+  {
+    new: true,
+  }
+);
 
   // update the author database
-  database.authors.forEach((author)=>
-  {
-    if(author.id === req.body.newAuthor)
-    return author.books.push(req.param.isbn);
-  })
-  return res.json({books: database.books, authors: database.authors, message: "new authors were added"});
+  // database.authors.forEach((author)=>
+  // {
+  //   if(author.id === req.body.newAuthor)
+  //   return author.books.push(req.param.isbn);
+  // })
+  const updatedAuthor =await AuthorModel.findOneAndUpdate(
+    {
+      id: req.params.newAuthor
+    },
+    {
+      $addToSet: {
+        books: req.params.isbn,
+        
+      },
+    },
+    {
+      new: true,
+    }
+  );
+  return res.json({books: updatedBook, authors: updatedAuthor, message: "new authors were added"});
 });
 
 /*
@@ -331,14 +357,17 @@ access     public
 parameters    isbn
 method   delete
 */
-shapeAI.delete(" /book/delete/:isbn", (req, res)=>{
-  const updatedBookDatabase = database.books.filter(
-  (book)=> book.ISBN !== req.params.isbn
-  );
-  database.books = updatedBookDatabase;
+shapeAI.delete(" /book/delete/:isbn", async(req, res)=>{
+  // const updatedBookDatabase = database.books.filter(
+  // (book)=> book.ISBN !== req.params.isbn
+  // );
+  // database.books = updatedBookDatabase;
+  const updatedBookDatabase = await BookModel.findOneAndDelete({
+    ISBN: req.params.isbn
+  });
   return res.json({books: database.books})
 
-  
+   
 });
 /*
 route     /book/delete/author
@@ -348,30 +377,58 @@ parameters    isbn, author id
 method   delete
 */
 
-shapeAI.delete("/book/delete/author/:isbn/:authorId", (req, res)=>{
-  //update the book database
-  database.books.forEach((books)=> {
-  if (books.ISBN === req.params.isbn){
-    const newAuthorList = books.authors.filter(
-    (author) => author !== parseInt(req.params.authodId)
-    );
+shapeAI.delete("/book/delete/author/:isbn/:authorId", async(req, res)=>{
+//   //update the book database
+//   database.books.forEach((books)=> {
+//   if (books.ISBN === req.params.isbn){
+//     const newAuthorList = books.authors.filter(
+//     (author) => author !== parseInt(req.params.authodId)
+//     );
   
-  books.authors = newAuthorList;
-  return;
+//   books.authors = newAuthorList;
+//   return;
     
-};
-  })
-//update the author databse 
-database.authors.forEach((author) =>{
-  if(author.id === parseInt(req.params.authorId)){
-    const newBooksList = author.books.filter(
-      (book) => book !== req.params.isbn
-    );
-    author.books = newBooksList;
-    return;
-  }
+// };
+//   })
+const UpdateBook = await BookModel.findOneAndUpdate(
+  {
+  ISBN: req.params.isbn,
+
+},
+{
+  $pull:{
+    authors: parseInt(req.param.authorId),
+
+  },
+  
+},
+{
+  
+  new: true
+  
 });
-return res.json({books: database.books, author:database.author, message:"author was deleted!"})
+//update the author databse 
+// database.authors.forEach((author) =>{
+//   if(author.id === parseInt(req.params.authorId)){
+//     const newBooksList = author.books.filter(
+//       (book) => book !== req.params.isbn
+//     );
+//     author.books = newBooksList;
+//     return;
+//   }
+// });
+const updatedAuthor = await AuthorModel.findOneAndUpdate(
+  {
+    id: parseInt(req.params.authorId),
+  },
+  {
+    $pull: {
+      books: req.params.isbn,
+    },
+  },
+  { new: true }
+);
+return res.json({books: updatedBook, author:updatedAuthor, message:"author was deleted!"})
 });
 
 /*
