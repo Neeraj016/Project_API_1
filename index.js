@@ -253,17 +253,22 @@ parameters    isbn
 method   put
 */
 
-shapeAI.put("/book/update/:title", (req, res)=>{
-  database.books.forEach((book) =>
-  {
-    if (book.ISBN === req.params.isbn) return
+shapeAI.put("/book/update/:isbn", async(req, res)=>{
+
+  const updatedBook = await BookModel.findOneAndUpdate(
     {
-      book.title = req.body.bookTitle;
-      return;
+    ISBN: req.params.isbn,
+  },
+    {
+      title: req.body.bookTitle,
+
+    },
+    {
+      new: true,
     }
-  })
-  return res.json({books: database.books});
-})
+    );
+  return res.json({books: updatedBook});
+});
 
 
 /*
