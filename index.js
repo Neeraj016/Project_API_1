@@ -227,9 +227,15 @@ method   post
 */
 
 shapeAI.post("/book/new",async (req, res) =>{
-  const{ newBook} = req.body;
-  const addNewBook = BookModel.create(newBook);
-  return res.json({books: database.books,message: "books was added!"})
+  try {
+    const { newBook } = req.body;
+
+    await BookModel.create(newBook);
+
+    return res.json({ message: "book was added!" });
+  } catch (error) {
+    return res.json({ error: error.message });
+  }
 });
 
 /*
